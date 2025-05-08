@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -31,4 +32,22 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
+}
+
+func CreatePost(w http.ResponseWriter, r *http.Request) {
+	var p models.Post
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		http.Error(w, "無効なリクエスト", http.StatusBadRequest)
+		return
+	}
+
+	query := `INSERT INTO posts (user_id, text, image_url) VALUES ($1, $2, $3)`
+	_, err := db.DB.Exec(query, p.UserID, p.Text, p.ImageURL)
+	if err != nil {
+		http.Error(w, "DB挿入エラー", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintln(w, "投稿作成成功")
 }

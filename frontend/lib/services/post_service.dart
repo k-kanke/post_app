@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/post.dart';
 
 class PostService {
-  static const String baseUrl = 'http://localhost:8080'; // ← iOSなら要変更
+  static const String baseUrl = 'http://192.168.3.33:8080'; // ← iOSなら要変更
 
   static Future<List<Post>> fetchPosts() async {
     final response = await http.get(Uri.parse('$baseUrl/posts'));

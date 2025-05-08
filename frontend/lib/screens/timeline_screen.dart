@@ -19,11 +19,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
     _postsFuture = PostService.fetchPosts();
   }
 
-  void _goToCreatePost(BuildContext context) {
-    Navigator.push(
+  void _goToCreatePost(BuildContext context) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const PostCreateScreen()),
     );
+    setState(() {
+      _postsFuture = PostService.fetchPosts();
+    });
   }
 
   @override
