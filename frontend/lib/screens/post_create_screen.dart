@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/image_upload_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -14,7 +15,6 @@ class PostCreateScreen extends StatefulWidget {
 class _PostCreateScreenState extends State<PostCreateScreen> {
   final TextEditingController _textController = TextEditingController();
   XFile? _selectedImage;
-
   final ImagePicker _picker = ImagePicker();
 
   // 画像を選択
@@ -27,26 +27,27 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
 
   // 投稿する
   Future<void> _submitPost() async {
-    print("_submit呼び出された");
     final text = _textController.text;
 
     if (text.isEmpty || _selectedImage == null) {
-      print("入力不足");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('テキストと画像を両方選んでください')));
       return;
     }
 
-    // 仮でローカル画像ファイルのパスを「画像URL」として扱う
-    final imageUrl = 'https://picsum.photos/200'; // 後で本物のURLに置き換え予定
+    // 画像をアップロードしてURLを取得
+    final imageUrl = await ImageUploadService.uploadImage(_selectedImage!);
+    if (imageUrl == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('画像のアップロードに失敗しました')));
+    }
 
-    print('--- 投稿処理開始 ---');
-    print('送信テキスト: $text');
-    print('画像URL: $imageUrl');
-
+    // 投稿を送信
+    final url = Uri.parse('http://192.168.3.33:8080/posts');
     final response = await http.post(
-      Uri.parse('http://192.168.3.33:8080/posts'),
+      url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': 1, // テスト用ユーザーID
@@ -56,7 +57,7 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      Navigator.pop(context); // タイムラインに戻る
+      Navigator.pop(context); // 投稿成功するとタイムラインに戻る
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('投稿に失敗しました (${response.statusCode})')),
