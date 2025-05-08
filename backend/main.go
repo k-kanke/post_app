@@ -23,6 +23,9 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/upload-image", handlers.UploadImage)
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
+
 	log.Println("サーバー起動：http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
