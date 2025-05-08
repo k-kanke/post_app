@@ -48,18 +48,53 @@ class _TimelineScreenState extends State<TimelineScreen> {
               itemCount: posts.length,
               itemBuilder: (context, index) {
                 final post = posts[index];
-                return ListTile(
-                  title: Text(post.text),
-                  subtitle: Text('ユーザーID: ${post.userId}'),
-                  leading:
-                      post.imageUrl.isNotEmpty
-                          ? Image.network(
-                            post.imageUrl,
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                          )
-                          : const Icon(Icons.image),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 投稿画像
+                        post.imageUrl.isNotEmpty
+                            ? ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
+                              child: Image.network(
+                                post.imageUrl,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, error, StackTrace) => const Icon(
+                                      Icons.broken_image,
+                                      size: 100,
+                                    ),
+                              ),
+                            )
+                            : const SizedBox(
+                              height: 200,
+                              child: Center(child: Icon(Icons.image)),
+                            ),
+
+                        // テキスト部分
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            post.text,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             );
